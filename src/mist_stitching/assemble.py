@@ -3,11 +3,21 @@ import numpy as np
 import skimage.io
 
 
-def assemble_image(global_positions_filepath, images_dirpath, output_filepath):
+# TODO: just pass global_positions to functions assemble_and_save / assemble_image
 
+def assemble_and_save_image(global_positions_filepath, images_dirpath, output_filepath):
+    
     parent, fn = os.path.split(output_filepath)
-    if not os.path.exists(parent):
+    if not os.path.exists(parent) and parent != '':
         os.makedirs(parent)
+        
+    stitched_image = assemble_image(global_positions_filepath, images_dirpath)
+                
+    print('Saving stitched image to disk')
+    skimage.io.imsave(output_filepath, stitched_image, plugin=None, tile=(1024, 1024), check_contrast=False)
+
+    
+def assemble_image(global_positions_filepath, images_dirpath,):
 
     if not os.path.exists(global_positions_filepath):
         raise RuntimeError('Missing global positions file: {}'.format(global_positions_filepath))
@@ -80,9 +90,7 @@ def assemble_image(global_positions_filepath, images_dirpath, output_filepath):
         else:
             stitched_img[y:y+tile_h, x:x+tile_w, :] = tile
 
-    print('Saving stitched image to disk')
-    skimage.io.imsave(output_filepath, stitched_img, plugin=None, tile=(1024, 1024), check_contrast=False)
-
+    return stitched_img
 
 if __name__ == "__main__":
     import argparse
@@ -97,4 +105,4 @@ if __name__ == "__main__":
     images_dirpath = args.images_dirpath
     output_filepath = args.output_filepath
 
-    assemble_image(global_positions_filepath, images_dirpath, output_filepath)
+    assemble_and_save_image(global_positions_filepath, images_dirpath, output_filepath)
