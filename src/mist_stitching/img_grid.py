@@ -376,3 +376,36 @@ class TileGridFromCsv(TileGrid):
                 if os.path.exists(os.path.join(self.args.image_dirpath, fn)):
                     t = img_tile.Tile(row, col, os.path.join(self.args.image_dirpath, fn), disable_cache=self.args.disable_mem_cache)
                     self.tiles[row][col] = t
+
+
+class TileGridFromDataFrame(TileGrid):
+
+    def __init__(self, df, args: argparse.Namespace):
+        super().__init__(args)
+
+        # if not os.path.exists(self.args.grid_csv_filepath):
+        #     raise RuntimeError("Grid csv file does not exist: {}".format(self.args.grid_csv_filepath))
+
+        self.tiles = list()
+        import pandas as pd
+        df = df
+        self.height = df.shape[0]
+        self.width = df.shape[1]
+        # add grid size to args namespace
+        self.args.grid_height = self.height
+        self.args.grid_width = self.width
+
+
+        # init a 2d list to hold Tiles
+        self.tiles = [[None for _ in range(self.width)] for _ in range(self.height)]
+        for row in range(self.height):
+            for col in range(self.width):
+                fn = df.iloc[row, col]
+                if not isinstance(fn, str):
+                    continue
+                fn = fn.strip()
+                if len(fn) == 0:
+                    continue
+                if os.path.exists(os.path.join(self.args.image_dirpath, fn)):
+                    t = img_tile.Tile(row, col, os.path.join(self.args.image_dirpath, fn), disable_cache=self.args.disable_mem_cache)
+                    self.tiles[row][col] = t
