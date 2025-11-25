@@ -5,48 +5,55 @@ import skimage.io
 
 # TODO: just pass global_positions to functions assemble_and_save / assemble_image
 
-def assemble_and_save_image(global_positions_filepath, images_dirpath, output_filepath):
+# def assemble_and_save_image(global_positions_filepath, images_dirpath, output_filepath):
+def assemble_and_save_image(global_positions, images_dirpath, output_filepath):
     
     parent, fn = os.path.split(output_filepath)
     if not os.path.exists(parent) and parent != '':
         os.makedirs(parent)
         
-    stitched_image = assemble_image(global_positions_filepath, images_dirpath)
+    stitched_image = assemble_image(global_positions, images_dirpath)
                 
     print('Saving stitched image to disk')
     skimage.io.imsave(output_filepath, stitched_image, plugin=None, tile=(1024, 1024), check_contrast=False)
 
     
-def assemble_image(global_positions_filepath, images_dirpath,):
+def assemble_image(global_positions, images_dirpath):
 
-    if not os.path.exists(global_positions_filepath):
-        raise RuntimeError('Missing global positions file: {}'.format(global_positions_filepath))
+    # if not os.path.exists(global_positions):
+    #     raise RuntimeError('Missing global positions file: {}'.format(global_positions))
 
-    # load the global positions for each image
-    img_names = list()
-    pixel_x_position = list()
-    pixel_y_position = list()
-    with open(global_positions_filepath, 'r') as fh:
-        for line in fh:
-            line = line.strip()
-            toks = line.split(';')
+    # # load the global positions for each image
+    # img_names = list()
+    # pixel_x_position = list()
+    # pixel_y_position = list()
+    # with open(global_positions, 'r') as fh:
+    #     for line in fh:
+    #         line = line.strip()
+    #         toks = line.split(';')
 
-            # handle file name loading
-            fn_tok = toks[0]
-            fn = fn_tok.split(':')[1].strip()
-            img_names.append(fn)
+    #         # handle file name loading
+    #         fn_tok = toks[0]
+    #         fn = fn_tok.split(':')[1].strip()
+    #         img_names.append(fn)
 
-            # handle the position loading
-            pos_tok = toks[2]
-            pos_pair = pos_tok.split(':')[1].strip()
-            pos_pair = pos_pair.replace(')', '')
-            pos_pair = pos_pair.replace('(', '')
-            pos_pairs = pos_pair.split(',')
-            x = int(pos_pairs[0].strip())
-            y = int(pos_pairs[1].strip())
-            pixel_x_position.append(x)
-            pixel_y_position.append(y)
+    #         # handle the position loading
+    #         pos_tok = toks[2]
+    #         pos_pair = pos_tok.split(':')[1].strip()
+    #         pos_pair = pos_pair.replace(')', '')
+    #         pos_pair = pos_pair.replace('(', '')
+    #         pos_pairs = pos_pair.split(',')
+    #         x = int(pos_pairs[0].strip())
+    #         y = int(pos_pairs[1].strip())
+    #         pixel_x_position.append(x)
+    #         pixel_y_position.append(y)
 
+    # print(pixel_x_position)
+
+    img_names = global_positions['file']
+    pixel_x_position = global_positions['position_x']
+    pixel_y_position = global_positions['position_y']
+    
     # verify that all images exist
     if not os.path.exists(images_dirpath):
         raise RuntimeError('Images directory does not exist: {}'.format(images_dirpath))

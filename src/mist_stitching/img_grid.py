@@ -142,7 +142,39 @@ class TileGrid():
 
                     f.write("file: {}; corr: {:0.10f}; position: ({:d}, {:d}); grid: ({:d}, {:d});\n".format(tile.name, ncc, tile.abs_x, tile.abs_y, c, r))
 
+    # note: setup similiar to write_global_positions_to_file except
+    # returns dictionary instead of writing to file
+    def get_global_positions(self):
+        res = {
+            "file": [], 
+            "corr": [],
+            "position_x": [],
+            "position_y": [],
+            "grid_c": [],
+            "grid_r": []
+        }
 
+        for r in range(self.args.grid_height):
+            for c in range(self.args.grid_width):
+                tile = self.get_tile(r, c)
+                if tile is None:
+                    continue
+
+                ncc = tile.get_max_translation_ncc()
+                if np.isnan(ncc):
+                    ncc = -1.0
+
+                res["file"].append(tile.name)
+                res["corr"].append(ncc)
+                
+                res["position_x"].append(tile.abs_x)
+                res["position_y"].append(tile.abs_y)
+                
+                res["grid_c"].append(c)
+                res["grid_r"].append(r)
+
+        return res
+        
 class TileGridRowCol(TileGrid):
     colPattern = "(.*)(\\{[c]+\\})(.*)"
     rowPattern = "(.*)(\\{[r]+\\})(.*)"
