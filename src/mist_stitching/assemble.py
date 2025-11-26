@@ -50,6 +50,7 @@ def assemble_image(global_positions, images_dirpath):
 
     # print(pixel_x_position)
 
+    # extract information needed for image stitching
     img_names = global_positions['file']
     pixel_x_position = global_positions['position_x']
     pixel_y_position = global_positions['position_y']
@@ -60,7 +61,7 @@ def assemble_image(global_positions, images_dirpath):
 
     for fn in img_names:
         if not os.path.exists(os.path.join(images_dirpath, fn)):
-            raise RuntimeError('Image {} expected based on global positions file, but its missing from the image directory.'.format(fn))
+            raise RuntimeError(f'Image {fn} expected based on global positions, but its missing from the image directory.')
 
     # compute how large of an output image will be required.
     first_tile = skimage.io.imread(os.path.join(images_dirpath, img_names[0]))
@@ -75,7 +76,7 @@ def assemble_image(global_positions, images_dirpath):
     stitched_img_w = tile_w + np.max(pixel_x_position)
 
     # creating blank image
-    print('Creating blank stitched image of size: ({}, {}, {})'.format(stitched_img_h, stitched_img_w, n_channels))
+    print(f'Creating blank stitched image of size: ({stitched_img_h}, {stitched_img_w}, {n_channels})')
     if n_channels == 1:
         stitched_img = np.zeros((stitched_img_h, stitched_img_w), dtype=first_tile.dtype)
     else:
@@ -85,7 +86,7 @@ def assemble_image(global_positions, images_dirpath):
         fn = img_names[i]
         x = pixel_x_position[i]
         y = pixel_y_position[i]
-        print('Img {}/{}. Placing {} at ({}, {})'.format(i, len(img_names), fn, x, y))
+        print('Img {}/{}. Placing {} at ({}, {})'.format(i+1, len(img_names), fn, x, y))
         tile = skimage.io.imread(os.path.join(images_dirpath, fn))
         if tile.shape != tile_shape:
             raise RuntimeError('All images must be the same shape. Image {} is {}, expected {}'.format(fn, tile.shape, tile_shape))
