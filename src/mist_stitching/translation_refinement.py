@@ -110,9 +110,18 @@ class Refine(ABC):
         y_min = np.clip(y_min, -(height - 1), height - 1)
         y_max = np.clip(y_max, -(height - 1), height - 1)
 
-        # create array of peaks +1 for inclusive
-        cache = np.nan * np.ones((x_max - x_min + 2, y_max - y_min + 2), dtype=np.float32)  # +2 to be inclusive of both end points
+        #### DEBUG: #####
 
+        # Noticed that cache is indexed according to y, x so switched
+        # size to be y,x instead of x, y. Fixed out of bounds error (maybe?)
+        
+        # create array of peaks +1 for inclusive
+        # cache = np.nan * np.ones((x_max - x_min + 2, y_max - y_min + 2), dtype=np.float32)  # +2 to be inclusive of both end points
+
+        cache = np.nan * np.ones((y_max - y_min + 2, x_max - x_min + 2), dtype=np.float32)  # +2 to be inclusive of both end points
+
+        ##################
+        
         peak_results = list()
         # evaluate the starting point hill climb
         peak = Refine.hill_climb_worker(i1, i2, x_min, x_max, y_min, y_max, start_x, start_y, cache)
@@ -134,6 +143,10 @@ class Refine(ABC):
         # determine how many converged
         converged = np.sum([1 for peak in peak_results if peak.x == best_peak.x and peak.y == best_peak.y])
         logging.info("Translation Hill Climb ({}, ({}) had {}/{} hill climbs converge with best ncc = {}".format(t1.name, t2.name, converged, num_hill_climbs, best_peak.ncc))
+
+        if best_peak.ncc < 0.5:
+            logging.warning(f"Unusually low NCC of {best_peak.ncc} between {t1.name} and {t2.name}")
+    
         return best_peak
 
     @staticmethod
